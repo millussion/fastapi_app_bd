@@ -4,10 +4,11 @@ from fastapi import Depends
 from sqlmodel import Session, create_engine
 import os
 from dotenv import load_dotenv
+import os
+from sqlmodel import create_engine, Session
 
-load_dotenv()
-database_url = os.getenv("Database_url")
-
+# Leer la variable de entorno inyectada por Docker Compose
+database_url = os.getenv("DATABASE_URL")
 engine = create_engine(database_url)
 
 def get_session():
@@ -15,3 +16,4 @@ def get_session():
         yield session
 
 SessionDep = Annotated[Session, Depends(get_session)]
+

@@ -1,8 +1,9 @@
 from fastapi import Depends, FastAPI, HTTPException, status
 from pydantic import BaseModel, Field, field_validator
-from sqlmodel import select
+from sqlmodel import select, SQLModel
 from src.models.product_model import Product
-from src.shared.database.session_db import SessionDep, get_session
+from src.shared.database.session_db import SessionDep, get_session, engine
+from typing import Optional
 
 app = FastAPI()
 
