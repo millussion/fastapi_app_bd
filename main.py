@@ -4,6 +4,9 @@ from sqlmodel import select, SQLModel
 from src.models.product_model import Product
 from src.shared.database.session_db import SessionDep, get_session, engine
 from typing import Optional
+import os
+import boto3
+from fastapi import FastAPI, UploadFile, File, HTTPException
 
 app = FastAPI()
 
@@ -23,6 +26,36 @@ class CreateProduct(BaseModel):
             return value.strip().lower()
         return value
 
+# Endpoint de salud
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "message": "La aplicación está funcionando"}
+
+# Endpoint para subir imágenes
+@app.post("/images")
+async def upload_image(file: UploadFile = File(...)):
+    # 1. Validar que sea un archivo permitido
+    allowed_types = ["image/jpeg", "image/png", "image/jpg"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Tipo de archivo no permitido. Solo JPG o PNG.")
+
+    # Obtener el nombre del bucket de las variables de entorno
+    bucket_name = os.getenv("AWS_BUCKET_NAME")
+    if not bucket_name:
+        raise HTTPException(status_code=500, detail="Variable AWS_BUCKET_NAME no configurada.")
+
+    try:
+        # 2. Inicializar Boto3 (Usa el Rol IAM de la EC2 automáticamente)
+        s3_client = boto3.client('s3')
+        
+        # 3. Subir el archivo al bucket S3
+        s3_client.upload_fileobj(file.file, bucket_name, file.filename)
+        
+        # 4. Devolver respuesta de éxito
+        return {"message": "Imagen subida correctamente", "filename": file.filename}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno al subir la imagen: {str(e)}")
 
 @app.post("/product",status_code=status.HTTP_201_CREATED)
 def create_product(product: CreateProduct, session: SessionDep):

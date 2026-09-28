@@ -28,7 +28,7 @@ fastapi_app_bd/
 ├── Dockerfile                # Instrucciones de construcción de la imagen de la API
 ├── docker-compose.yml        # Orquestación de contenedores (API, DB)
 ├── requirements.txt          # Dependencias de Python
-└── alembic.ini               # Archivo de inicialización de Alembic
+└── alembic.ini               # Archivo de inicialización de Alembic```
 
 
 # Guía Rápida de Ejecución (FastAPI + Docker + Alembic)
